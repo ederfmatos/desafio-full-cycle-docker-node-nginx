@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  mysql:
+    container_name: full-cycle-mysql
+    build: ./mysql
+    networks:
+      - fullcyclenetwork
+    environment:
+      MYSQL_DATABASE: fullcycle
+      MYSQL_USER: fullcycle
+      MYSQL_PASSWORD: fullcycle
+      MYSQL_ROOT_PASSWORD: fullcycle
+  
+  app:
+    image: ederfmatos/full-cycle-node
+    build: ./node
+    container_name: full-cycle-node
+    networks:
+      - fullcyclenetwork
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mysql
+    environment:
+      DATABASE_HOST: mysql
+      DATABASE_USER: fullcycle
+      DATABASE_NAME: fullcycle
+      DATABASE_PASSWORD: fullcycle
+
+  nginx:
+    image: nginx:1.22.1
+    container_name: full-cycle-nginx
+    networks:
+      - fullcyclenetwork
+    depends_on:
+      - app
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+
+
+networks:
+  fullcyclenetwork:
+    driver: bridge
